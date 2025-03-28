@@ -1,0 +1,3346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Appointment Booking</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add SheetJS library in the head section -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Add this in the head section -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #3b82f6;
+            --background-light: #ffffff;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark-mode {
+            --primary-color: #3b82f6;
+            --secondary-color: #60a5fa;
+            --background-light: #1f2937;
+            --text-dark: #f3f4f6;
+            --text-light: #d1d5db;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(rgba(36, 37, 38, 0.9), rgba(53, 55, 56, 0.9)),
+                        url('https://images.unsplash.com/photo-1537368910025-700350fe46c7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            padding: 150px 0;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Service Cards */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 50px 0;
+        }
+
+        .service-card {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .service-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .service-content {
+            padding: 25px;
+        }
+
+        .service-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .service-content p {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Form Styles */
+        .booking-form {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            margin: 50px 0;
+        }
+
+        .booking-form h2 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: var(--border-radius);
+            background: var(--background-light);
+            color: var(--text-dark);
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover {
+            border-color: var(--primary-color);
+        }
+
+        /* Button Styles */
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Dark Mode Toggle */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .dark-mode-toggle .btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--background-light);
+            color: var(--text-dark);
+            box-shadow: var(--card-shadow);
+        }
+
+        .dark-mode-toggle .btn:hover {
+            transform: rotate(360deg);
+            box-shadow: var(--hover-shadow);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section Headers */
+        section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: var(--text-dark);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        /* Appointments Styling */
+        .appointments-container {
+            margin-top: 30px;
+        }
+
+        .appointments-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 15px;
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .search-input, .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .search-input:focus, .filter-select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .search-input {
+            width: 300px;
+        }
+
+        .btn-secondary {
+            background: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-light);
+        }
+
+        .appointments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .appointment-card {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .appointment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .appointment-service {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .appointment-date {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .appointment-details {
+            margin-bottom: 15px;
+        }
+
+        .appointment-details p {
+            margin: 5px 0;
+            color: var(--text-light);
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-delete, .btn-edit {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        .btn-delete {
+            background: var(--error-color);
+        }
+
+        .btn-edit {
+            background: var(--success-color);
+        }
+
+        /* Add style for export buttons */
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--text-dark);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary i {
+            font-size: 1.1rem;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 350px;
+        }
+
+        .notification.success {
+            background: var(--success-color);
+        }
+
+        .notification.error {
+            background: var(--error-color);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Calendar View Styles */
+        .calendar-view {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            padding: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .calendar-day:hover {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .calendar-day.has-appointments {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .calendar-day.today {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .calendar-day-header {
+            font-weight: 600;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .appointment-count {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            line-height: 20px;
+            margin-left: 5px;
+        }
+
+        .day-appointments {
+            display: none;
+            position: absolute;
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: var(--hover-shadow);
+            z-index: 100;
+            min-width: 250px;
+        }
+
+        .day-appointments.show {
+            display: block;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .view-toggle button {
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            border: none;
+            background: var(--text-light);
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .view-toggle button.active {
+            background: var(--primary-color);
+        }
+
+        /* Service Management Styles */
+        .service-management {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 40px;
+        }
+
+        .service-filters {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .price-filter {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .price-filter input[type="range"] {
+            width: 200px;
+            height: 6px;
+            background: var(--primary-color);
+            border-radius: 5px;
+            outline: none;
+            appearance: none;
+        }
+
+        .price-filter input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .price-filter input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .services-grid-detailed {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .service-card-detailed {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .service-card-detailed:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .service-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .service-info {
+            padding: 20px;
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .service-title {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .service-price {
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+        }
+
+        .service-details {
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        .service-meta {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .service-duration {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .service-availability {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .availability-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .availability-indicator.available {
+            background: var(--success-color);
+        }
+
+        .availability-indicator.limited {
+            background: #f59e0b;
+        }
+
+        .availability-indicator.busy {
+            background: var(--error-color);
+        }
+
+        .service-book-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 15px;
+        }
+
+        .service-book-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        /* Time Slots Styles */
+        .time-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .time-slot {
+            padding: 10px;
+            text-align: center;
+            border: 2px solid var(--primary-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--background-light);
+        }
+
+        .time-slot:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow);
+        }
+
+        .time-slot.selected {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .time-slot.unavailable {
+            border-color: var(--text-light);
+            color: var(--text-light);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Recurring Options Styles */
+        .recurring-select {
+            margin-bottom: 10px;
+        }
+
+        .recurring-options {
+            padding: 15px;
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+        }
+
+        .recurring-dates {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+        }
+
+        .recurring-date {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .recurring-date:last-child {
+            border-bottom: none;
+        }
+
+        /* Availability Legend */
+        .availability-legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+
+        .legend-available {
+            background: var(--primary-color);
+        }
+
+        .legend-unavailable {
+            background: var(--text-light);
+        }
+
+        /* Staff Management Styles */
+        .staff-management {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .staff-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .staff-filters {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .filter-select {
+            min-width: 180px;
+            padding: 10px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            background: white;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .staff-view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: var(--border-radius);
+        }
+
+        .view-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .staff-grid.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .staff-card {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .staff-grid.list-view .staff-card {
+            flex-direction: row;
+            height: 200px;
+        }
+
+        .staff-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .staff-image-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .staff-grid.list-view .staff-image-container {
+            width: 200px;
+            flex-shrink: 0;
+        }
+
+        .staff-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .staff-grid.list-view .staff-image {
+            height: 100%;
+        }
+
+        .staff-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .staff-status.available {
+            color: var(--success-color);
+        }
+
+        .staff-status.busy {
+            color: var(--error-color);
+        }
+
+        .staff-info {
+            padding: 20px;
+            flex: 1;
+        }
+
+        .staff-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .staff-name-title {
+            flex: 1;
+        }
+
+        .staff-name {
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .staff-title {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .staff-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .rating-stars {
+            color: #f59e0b;
+        }
+
+        .staff-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .staff-schedule {
+            margin-top: 15px;
+        }
+
+        .schedule-preview {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .schedule-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-light);
+        }
+
+        .schedule-dot.active {
+            background: var(--success-color);
+        }
+
+        .staff-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .btn-book-staff {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-book-staff:hover {
+            background: var(--secondary-color);
+        }
+
+        .btn-view-profile {
+            padding: 10px 15px;
+            border: 1px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-view-profile:hover {
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        /* Enhanced Modal Styles */
+        .staff-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .staff-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .staff-modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--error-color);
+        }
+
+        /* Reviews Section Styles */
+        .reviews-section {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 40px;
+        }
+
+        .reviews-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 30px;
+            gap: 30px;
+        }
+
+        .rating-summary {
+            display: flex;
+            gap: 40px;
+        }
+
+        .average-rating {
+            text-align: center;
+        }
+
+        .average-rating h3 {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .stars {
+            color: #f59e0b;
+            font-size: 1.5rem;
+            margin: 5px 0;
+        }
+
+        .rating-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .rating-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .bar-container {
+            width: 200px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .btn-add-review {
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-add-review:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .reviews-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .review-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reviewer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .review-rating {
+            color: #f59e0b;
+        }
+
+        .review-content {
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        .review-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Review Form Modal */
+        .review-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .review-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .review-form {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 500px;
+            transform: translateY(-20px);
+            transition: var(--transition);
+        }
+
+        .review-modal.active .review-form {
+            transform: translateY(0);
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 10px;
+            font-size: 1.5rem;
+            color: #f59e0b;
+            margin: 15px 0;
+        }
+
+        .star-rating span {
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .star-rating span:hover {
+            transform: scale(1.2);
+        }
+
+        .notification-center {
+            position: fixed;
+            top: 80px;
+            right: -400px;
+            width: 350px;
+            max-height: 80vh;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            transition: right 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification-center.active {
+            right: 20px;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-header h3 {
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        .clear-all {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .notification-list {
+            padding: 10px;
+            max-height: calc(80vh - 60px);
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background: var(--background-light);
+            margin-bottom: 10px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            transform: translateX(-5px);
+        }
+
+        .notification-item.unread {
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .notification-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: var(--card-shadow);
+        }
+
+        @media (max-width: 768px) {
+            .notification-center {
+                width: 100%;
+                right: -100%;
+                top: 0;
+                height: 100vh;
+            }
+
+            .notification-center.active {
+                right: 0;
+            }
+        }
+
+        .reports-management {
+            background: var(--background-light);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 40px;
+        }
+
+        .reports-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .reports-filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-generate-report {
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-generate-report:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .reports-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .report-type {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .report-type.report { background: #e3f2fd; color: #1976d2; }
+        .report-type.prescription { background: #e8f5e9; color: #2e7d32; }
+        .report-type.test { background: #fff3e0; color: #f57c00; }
+
+        .report-date {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .report-content {
+            margin-bottom: 20px;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .report-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .btn-view {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-download {
+            background: #f5f5f5;
+            color: var(--text-dark);
+        }
+
+        .report-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .report-form-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .report-form-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .report-form {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle -->
+    <div class="dark-mode-toggle">
+        <button class="btn" id="darkModeBtn">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <!-- Header Section -->
+    <header class="header">
+        <div class="container">
+            <h1>Professional Appointment Booking</h1>
+            <p>Schedule your appointments with ease and style</p>
+        </div>
+    </header>
+
+    <!-- Services Section -->
+    <section class="container">
+        <h2>Our Services</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Service 1">
+                <div class="service-content">
+                    <h3>Consultation</h3>
+                    <p>Professional consultation services for your needs</p>
+                </div>
+            </div>
+            <div class="service-card">
+                <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Service 2">
+                <div class="service-content">
+                    <h3>Treatment</h3>
+                    <p>Specialized treatment sessions</p>
+                </div>
+            </div>
+            <div class="service-card">
+                <img src="https://images.unsplash.com/photo-1584362917165-526a968579e8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Service 3">
+                <div class="service-content">
+                    <h3>Follow-up</h3>
+                    <p>Comprehensive follow-up care</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Update the Staff Section -->
+    <section class="container">
+        <h2>Our Expert Team</h2>
+        <div class="staff-management">
+            <div class="staff-header">
+                <div class="staff-filters">
+                    <div class="filter-group">
+                        <label>Specialty</label>
+                        <select id="staffSpecialty" class="filter-select">
+                            <option value="">All Specialties</option>
+                            <option value="general">General Practice</option>
+                            <option value="specialist">Specialist</option>
+                            <option value="expert">Expert Consultant</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Availability</label>
+                        <select id="staffAvailability" class="filter-select">
+                            <option value="">Any Time</option>
+                            <option value="today">Available Today</option>
+                            <option value="week">This Week</option>
+                            <option value="morning">Morning Hours</option>
+                            <option value="afternoon">Afternoon Hours</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Language</label>
+                        <select id="staffLanguage" class="filter-select">
+                            <option value="">Any Language</option>
+                            <option value="English">English</option>
+                            <option value="Spanish">Spanish</option>
+                            <option value="Mandarin">Mandarin</option>
+                            <option value="Arabic">Arabic</option>
+                            <option value="French">French</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="staff-view-toggle">
+                    <button class="view-btn active" data-view="grid">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="view-btn" data-view="list">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="staffGrid" class="staff-grid"></div>
+        </div>
+    </section>
+
+    <!-- Add this section after the Staff Section -->
+    <section class="container">
+        <h2>Available Services</h2>
+        <div class="service-management">
+            <div class="service-list">
+                <div class="service-filters">
+                    <select id="serviceCategory" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option value="consultation">Consultation</option>
+                        <option value="treatment">Treatment</option>
+                        <option value="followup">Follow-up</option>
+                    </select>
+                    <div class="price-filter">
+                        <input type="range" id="priceRange" min="0" max="500" step="50">
+                        <span id="priceValue">Max Price: $500</span>
+                    </div>
+                </div>
+                <div class="services-grid-detailed" id="servicesGrid">
+                    <!-- Services will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Form -->
+    <section class="container">
+        <div class="booking-form">
+            <h2>Book Your Appointment</h2>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" required placeholder="Enter your phone number">
+                </div>
+                <div class="form-group">
+                    <label for="service">Select Service</label>
+                    <select id="service" required>
+                        <option value="">Choose a service...</option>
+                        <option value="consultation">Consultation</option>
+                        <option value="treatment">Treatment</option>
+                        <option value="followup">Follow-up</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="datetime">Preferred Date & Time</label>
+                    <input type="datetime-local" id="datetime" required>
+                </div>
+                <div class="form-group">
+                    <label for="timeSlot">Available Time Slots</label>
+                    <div class="time-slots-grid" id="timeSlots"></div>
+                </div>
+                <div class="form-group">
+                    <label for="recurring">Recurring Appointment</label>
+                    <select id="recurring" class="recurring-select">
+                        <option value="none">No Recurring</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="biweekly">Bi-weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                    <div id="recurringOptions" class="recurring-options" style="display: none;">
+                        <label>Repeat for</label>
+                        <select id="recurringCount">
+                            <option value="2">2 times</option>
+                            <option value="3">3 times</option>
+                            <option value="4">4 times</option>
+                            <option value="5">5 times</option>
+                            <option value="6">6 times</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Book Appointment</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Appointments List -->
+    <section class="container">
+        <h2>Your Appointments</h2>
+        <div class="appointments-container">
+            <div class="appointments-controls">
+                <div class="search-filter">
+                    <input type="text" id="searchAppointments" placeholder="Search appointments..." class="search-input">
+                    <select id="filterService" class="filter-select">
+                        <option value="">All Services</option>
+                        <option value="consultation">Consultation</option>
+                        <option value="treatment">Treatment</option>
+                        <option value="followup">Follow-up</option>
+                    </select>
+                </div>
+                <div class="export-buttons">
+                    <button id="exportExcel" class="btn btn-secondary">
+                        <i class="fas fa-file-excel"></i> Export to Excel
+                    </button>
+                </div>
+            </div>
+            <div class="view-toggle">
+                <button id="gridView" class="active">Grid View</button>
+                <button id="calendarView">Calendar View</button>
+            </div>
+            <div id="calendarContainer" class="calendar-view" style="display: none;">
+                <div class="calendar-header">
+                    <h3 id="currentMonth">September 2023</h3>
+                    <div class="calendar-nav">
+                        <button class="btn btn-secondary" id="prevMonth">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-secondary" id="nextMonth">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+            <div id="appointmentsList" class="appointments-grid"></div>
+        </div>
+    </section>
+
+    <!-- Add this section before the closing </body> tag -->
+    <div id="notificationCenter" class="notification-center">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button onclick="clearAllNotifications()" class="clear-all">Clear All</button>
+        </div>
+        <div id="notificationList" class="notification-list"></div>
+    </div>
+
+    <!-- Add this section before the closing </body> tag -->
+    <div id="reportsSection" class="container">
+        <h2>Medical Reports & Prescriptions</h2>
+        <div class="reports-management">
+            <div class="reports-header">
+                <div class="reports-filters">
+                    <select id="reportType" class="filter-select">
+                        <option value="all">All Documents</option>
+                        <option value="report">Medical Reports</option>
+                        <option value="prescription">Prescriptions</option>
+                        <option value="test">Test Results</option>
+                    </select>
+                    <input type="date" id="reportDate" class="filter-select">
+                </div>
+                <button class="btn-generate-report" onclick="showReportForm()">
+                    <i class="fas fa-file-medical"></i> Generate New Report
+                </button>
+            </div>
+            <div id="reportsList" class="reports-list"></div>
+        </div>
+    </div>
+
+    <!-- Move this section to after the Reports Section -->
+    <section class="container">
+        <h2>Patient Reviews</h2>
+        <div class="reviews-section">
+            <div class="reviews-header">
+                <div class="rating-summary">
+                    <div class="average-rating">
+                        <h3>4.8</h3>
+                        <div class="stars">★★★★★</div>
+                        <p>Based on 432 reviews</p>
+                    </div>
+                    <div class="rating-bars">
+                        <div class="rating-bar">
+                            <span>5 ★</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 75%"></div>
+                            </div>
+                            <span>320</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span>4 ★</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 15%"></div>
+                            </div>
+                            <span>65</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span>3 ★</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 7%"></div>
+                            </div>
+                            <span>30</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span>2 ★</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 2%"></div>
+                            </div>
+                            <span>10</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span>1 ★</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 1%"></div>
+                            </div>
+                            <span>7</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-add-review" onclick="showReviewForm()">
+                    <i class="fas fa-star"></i> Write a Review
+                </button>
+            </div>
+            <div class="reviews-filters">
+                <select id="reviewSort" class="filter-select">
+                    <option value="recent">Most Recent</option>
+                    <option value="highest">Highest Rated</option>
+                    <option value="lowest">Lowest Rated</option>
+                </select>
+                <select id="reviewDoctor" class="filter-select">
+                    <option value="">All Doctors</option>
+                </select>
+            </div>
+            <div id="reviewsList" class="reviews-list"></div>
+        </div>
+    </section>
+
+    <script>
+        // Dark mode toggle functionality
+        const darkModeBtn = document.getElementById('darkModeBtn');
+        const moonIcon = darkModeBtn.querySelector('i');
+        
+        darkModeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            moonIcon.classList.toggle('fa-moon');
+            moonIcon.classList.toggle('fa-sun');
+        });
+
+        // Form submission handling
+        const appointmentForm = document.getElementById('appointmentForm');
+        const appointmentsList = document.getElementById('appointmentsList');
+        const searchInput = document.getElementById('searchAppointments');
+        const filterSelect = document.getElementById('filterService');
+        const exportExcel = document.getElementById('exportExcel');
+
+        // Load appointments from localStorage
+        let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+
+        // Save appointment
+        appointmentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const baseAppointment = {
+                id: Date.now(),
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                service: document.getElementById('service').value,
+                datetime: document.getElementById('datetime').value
+            };
+
+            const recurringType = document.getElementById('recurring').value;
+            if (recurringType === 'none') {
+                // Single appointment
+                appointments.push(baseAppointment);
+            } else {
+                // Recurring appointments
+                const count = parseInt(document.getElementById('recurringCount').value);
+                const baseDate = new Date(baseAppointment.datetime);
+                
+                for (let i = 0; i < count; i++) {
+                    const appointmentDate = new Date(baseDate);
+                    switch (recurringType) {
+                        case 'weekly':
+                            appointmentDate.setDate(baseDate.getDate() + (i * 7));
+                            break;
+                        case 'biweekly':
+                            appointmentDate.setDate(baseDate.getDate() + (i * 14));
+                            break;
+                        case 'monthly':
+                            appointmentDate.setMonth(baseDate.getMonth() + i);
+                            break;
+                    }
+                    
+                    appointments.push({
+                        ...baseAppointment,
+                        id: Date.now() + i,
+                        datetime: appointmentDate.toISOString()
+                    });
+                }
+            }
+
+            localStorage.setItem('appointments', JSON.stringify(appointments));
+            displayAppointments();
+            appointmentForm.reset();
+            showNotification('Appointment(s) booked successfully!', 'success');
+        });
+
+        // Display appointments
+        function displayAppointments(filteredAppointments = appointments) {
+            appointmentsList.innerHTML = '';
+            
+            filteredAppointments.forEach(appointment => {
+                const date = new Date(appointment.datetime);
+                const card = document.createElement('div');
+                card.className = 'appointment-card';
+                card.innerHTML = `
+                    <div class="appointment-header">
+                        <span class="appointment-service">${appointment.service}</span>
+                        <span class="appointment-date">${date.toLocaleDateString()}</span>
+                    </div>
+                    <div class="appointment-details">
+                        <p><strong>Name:</strong> ${appointment.name}</p>
+                        <p><strong>Email:</strong> ${appointment.email}</p>
+                        <p><strong>Phone:</strong> ${appointment.phone}</p>
+                        <p><strong>Time:</strong> ${date.toLocaleTimeString()}</p>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="btn btn-edit" onclick="editAppointment(${appointment.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-delete" onclick="deleteAppointment(${appointment.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `;
+                appointmentsList.appendChild(card);
+            });
+        }
+
+        // Delete appointment
+        function deleteAppointment(id) {
+            if (confirm('Are you sure you want to delete this appointment?')) {
+                appointments = appointments.filter(appointment => appointment.id !== id);
+                localStorage.setItem('appointments', JSON.stringify(appointments));
+                displayAppointments();
+                showNotification('Appointment deleted successfully!', 'success');
+            }
+        }
+
+        // Edit appointment
+        function editAppointment(id) {
+            const appointment = appointments.find(a => a.id === id);
+            if (appointment) {
+                document.getElementById('name').value = appointment.name;
+                document.getElementById('email').value = appointment.email;
+                document.getElementById('phone').value = appointment.phone;
+                document.getElementById('service').value = appointment.service;
+                document.getElementById('datetime').value = appointment.datetime;
+                
+                // Remove the old appointment
+                deleteAppointment(id);
+                
+                // Scroll to form
+                document.querySelector('.booking-form').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Search and filter
+        function filterAppointments() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterValue = filterSelect.value.toLowerCase();
+            
+            const filtered = appointments.filter(appointment => {
+                const matchesSearch = appointment.name.toLowerCase().includes(searchTerm) ||
+                                    appointment.email.toLowerCase().includes(searchTerm);
+                const matchesFilter = !filterValue || appointment.service.toLowerCase() === filterValue;
+                return matchesSearch && matchesFilter;
+            });
+            
+            displayAppointments(filtered);
+        }
+
+        // Update or add the export function
+        function exportToExcel() {
+            // Format the data for Excel
+            const excelData = appointments.map(appointment => ({
+                'Date': new Date(appointment.datetime).toLocaleDateString(),
+                'Time': new Date(appointment.datetime).toLocaleTimeString(),
+                'Name': appointment.name,
+                'Email': appointment.email,
+                'Phone': appointment.phone,
+                'Service': appointment.service
+            }));
+
+            // Create a new workbook
+            const workbook = XLSX.utils.book_new();
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+            // Add the worksheet to the workbook
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Appointments');
+
+            // Generate Excel file
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            
+            // Save the file
+            saveAsExcelFile(excelBuffer, 'appointments');
+        }
+
+        function saveAsExcelFile(buffer, fileName) {
+            const data = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(data);
+            link.download = `${fileName}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Event listeners
+        searchInput.addEventListener('input', filterAppointments);
+        filterSelect.addEventListener('change', filterAppointments);
+        exportExcel.addEventListener('click', exportToExcel);
+
+        // Initial display
+        displayAppointments();
+
+        // Calendar View Functionality
+        const calendarContainer = document.getElementById('calendarContainer');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const currentMonthElement = document.getElementById('currentMonth');
+        const prevMonthBtn = document.getElementById('prevMonth');
+        const nextMonthBtn = document.getElementById('nextMonth');
+        const gridViewBtn = document.getElementById('gridView');
+        const calendarViewBtn = document.getElementById('calendarView');
+
+        let currentDate = new Date();
+
+        function generateCalendar(date) {
+            const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+            const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            
+            currentMonthElement.textContent = date.toLocaleString('default', { 
+                month: 'long', 
+                year: 'numeric' 
+            });
+
+            calendarGrid.innerHTML = '';
+
+            // Add day headers
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+
+            // Add empty cells for days before first day of month
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                calendarGrid.appendChild(document.createElement('div'));
+            }
+
+            // Add days
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                const currentDay = new Date(date.getFullYear(), date.getMonth(), day);
+                const dayAppointments = appointments.filter(appointment => {
+                    const appointmentDate = new Date(appointment.datetime);
+                    return appointmentDate.toDateString() === currentDay.toDateString();
+                });
+
+                if (dayAppointments.length > 0) {
+                    dayElement.classList.add('has-appointments');
+                }
+
+                if (currentDay.toDateString() === new Date().toDateString()) {
+                    dayElement.classList.add('today');
+                }
+
+                dayElement.innerHTML = `
+                    ${day}
+                    ${dayAppointments.length > 0 ? 
+                        `<span class="appointment-count">${dayAppointments.length}</span>` : 
+                        ''}
+                `;
+
+                dayElement.addEventListener('click', () => showDayAppointments(dayAppointments, dayElement));
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+
+        function showDayAppointments(dayAppointments, element) {
+            const existing = document.querySelector('.day-appointments');
+            if (existing) existing.remove();
+
+            if (dayAppointments.length === 0) return;
+
+            const appointmentsDiv = document.createElement('div');
+            appointmentsDiv.className = 'day-appointments';
+            
+            appointmentsDiv.innerHTML = `
+                <h4>Appointments</h4>
+                ${dayAppointments.map(appointment => `
+                    <div class="appointment-details">
+                        <p><strong>${appointment.name}</strong></p>
+                        <p>${new Date(appointment.datetime).toLocaleTimeString()}</p>
+                        <p>${appointment.service}</p>
+                    </div>
+                `).join('')}
+            `;
+
+            const rect = element.getBoundingClientRect();
+            appointmentsDiv.style.top = `${rect.bottom + window.scrollY + 10}px`;
+            appointmentsDiv.style.left = `${rect.left}px`;
+
+            document.body.appendChild(appointmentsDiv);
+
+            document.addEventListener('click', function closePopup(e) {
+                if (!appointmentsDiv.contains(e.target) && !element.contains(e.target)) {
+                    appointmentsDiv.remove();
+                    document.removeEventListener('click', closePopup);
+                }
+            });
+        }
+
+        // Navigation
+        prevMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            generateCalendar(currentDate);
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            generateCalendar(currentDate);
+        });
+
+        // View Toggle
+        gridViewBtn.addEventListener('click', () => {
+            gridViewBtn.classList.add('active');
+            calendarViewBtn.classList.remove('active');
+            appointmentsList.style.display = 'grid';
+            calendarContainer.style.display = 'none';
+        });
+
+        calendarViewBtn.addEventListener('click', () => {
+            calendarViewBtn.classList.add('active');
+            gridViewBtn.classList.remove('active');
+            appointmentsList.style.display = 'none';
+            calendarContainer.style.display = 'block';
+            generateCalendar(currentDate);
+        });
+
+        // Initialize calendar
+        generateCalendar(currentDate);
+
+        // Service Management
+       // ... existing code ...
+const services = [
+    {
+        id: 1,
+        name: "Initial Consultation",
+        category: "consultation",
+        price: 150,
+        duration: 60,
+        description: "Comprehensive initial consultation with detailed assessment",
+        image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        availability: "available"
+    },
+    {
+        id: 2,
+        name: "Standard Treatment",
+        category: "treatment",
+        price: 200,
+        duration: 45,
+        description: "Standard treatment session with personalized care",
+        image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        availability: "limited"
+    },
+    {
+        id: 3,
+        name: "Follow-up Session",
+        category: "followup",
+        price: 100,
+        duration: 30,
+        description: "Regular follow-up session to track progress",
+        image: "https://images.unsplash.com/photo-1584982751601-97dcc096659c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+        availability: "busy"
+    }
+];
+// ... existing code ...
+
+        const servicesGrid = document.getElementById('servicesGrid');
+        const serviceCategory = document.getElementById('serviceCategory');
+        const priceRange = document.getElementById('priceRange');
+        const priceValue = document.getElementById('priceValue');
+
+        function displayServices(filteredServices = services) {
+            servicesGrid.innerHTML = '';
+            
+            filteredServices.forEach(service => {
+                const card = document.createElement('div');
+                card.className = 'service-card-detailed';
+                card.innerHTML = `
+                    <img src="${service.image}" alt="${service.name}" class="service-image">
+                    <div class="service-info">
+                        <div class="service-header">
+                            <h3 class="service-title">${service.name}</h3>
+                            <span class="service-price">$${service.price}</span>
+                        </div>
+                        <p class="service-details">${service.description}</p>
+                        <div class="service-meta">
+                            <span class="service-duration">
+                                <i class="fas fa-clock"></i>
+                                ${service.duration} mins
+                            </span>
+                            <span class="service-availability">
+                                <span class="availability-indicator ${service.availability}"></span>
+                                ${service.availability.charAt(0).toUpperCase() + service.availability.slice(1)}
+                            </span>
+                        </div>
+                        <button class="service-book-btn" onclick="selectService(${service.id})">
+                            Book Now
+                        </button>
+                    </div>
+                `;
+                servicesGrid.appendChild(card);
+            });
+        }
+
+        function filterServices() {
+            const selectedCategory = serviceCategory.value;
+            const maxPrice = parseInt(priceRange.value);
+            
+            const filtered = services.filter(service => {
+                const matchesCategory = !selectedCategory || service.category === selectedCategory;
+                const matchesPrice = service.price <= maxPrice;
+                return matchesCategory && matchesPrice;
+            });
+            
+            displayServices(filtered);
+        }
+
+        function selectService(serviceId) {
+            const service = services.find(s => s.id === serviceId);
+            if (service) {
+                // Pre-fill the booking form
+                document.getElementById('service').value = service.category;
+                
+                // Scroll to booking form
+                document.querySelector('.booking-form').scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+                
+                showNotification(`Selected service: ${service.name}`, 'success');
+            }
+        }
+
+        // Event listeners
+        serviceCategory.addEventListener('change', filterServices);
+        priceRange.addEventListener('input', (e) => {
+            priceValue.textContent = `Max Price: $${e.target.value}`;
+            filterServices();
+        });
+
+        // Initialize display
+        displayServices();
+
+        // Time Slot Management
+        const timeSlots = document.getElementById('timeSlots');
+        const recurringSelect = document.getElementById('recurring');
+        const recurringOptions = document.getElementById('recurringOptions');
+        const recurringCount = document.getElementById('recurringCount');
+        const datetimeInput = document.getElementById('datetime');
+
+        // Business hours configuration
+        const businessHours = {
+            start: 9, // 9 AM
+            end: 17,  // 5 PM
+            interval: 30 // 30 minutes
+        };
+
+        // Generate time slots for a given date
+        function generateTimeSlots(date) {
+            timeSlots.innerHTML = '';
+            const currentDate = new Date();
+            
+            for (let hour = businessHours.start; hour < businessHours.end; hour++) {
+                for (let minute = 0; minute < 60; minute += businessHours.interval) {
+                    const slotTime = new Date(date);
+                    slotTime.setHours(hour, minute, 0, 0);
+                    
+                    // Skip past time slots for today
+                    if (date.toDateString() === currentDate.toDateString() && 
+                        slotTime < currentDate) {
+                        continue;
+                    }
+
+                    const isAvailable = checkSlotAvailability(slotTime);
+                    const timeString = slotTime.toLocaleTimeString([], { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    
+                    const slot = document.createElement('div');
+                    slot.className = `time-slot ${isAvailable ? '' : 'unavailable'}`;
+                    slot.textContent = timeString;
+                    
+                    if (isAvailable) {
+                        slot.addEventListener('click', () => selectTimeSlot(slot, slotTime));
+                    }
+                    
+                    timeSlots.appendChild(slot);
+                }
+            }
+
+            // Add availability legend
+            const legend = document.createElement('div');
+            legend.className = 'availability-legend';
+            legend.innerHTML = `
+                <div class="legend-item">
+                    <div class="legend-color legend-available"></div>
+                    <span>Available</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-unavailable"></div>
+                    <span>Unavailable</span>
+                </div>
+            `;
+            timeSlots.appendChild(legend);
+        }
+
+        // Check if a time slot is available
+        function checkSlotAvailability(datetime) {
+            return !appointments.some(appointment => {
+                const appointmentDate = new Date(appointment.datetime);
+                const timeDiff = Math.abs(appointmentDate - datetime);
+                // Consider slot unavailable if within 30 minutes of existing appointment
+                return timeDiff < 30 * 60 * 1000;
+            });
+        }
+
+        // Select a time slot
+        function selectTimeSlot(slot, datetime) {
+            // Remove previous selection
+            const selected = timeSlots.querySelector('.selected');
+            if (selected) {
+                selected.classList.remove('selected');
+            }
+            
+            // Add new selection
+            slot.classList.add('selected');
+            
+            // Update datetime input
+            datetimeInput.value = datetime.toISOString().slice(0, 16);
+            
+            // Update recurring dates if applicable
+            updateRecurringDates();
+        }
+
+        // Handle recurring appointments
+        function updateRecurringDates() {
+            const recurringType = recurringSelect.value;
+            const count = parseInt(recurringCount.value);
+            
+            if (recurringType === 'none') {
+                recurringOptions.style.display = 'none';
+                return;
+            }
+
+            recurringOptions.style.display = 'block';
+            
+            // Calculate recurring dates
+            const baseDate = new Date(datetimeInput.value);
+            const dates = [baseDate];
+            
+            for (let i = 1; i < count; i++) {
+                const nextDate = new Date(baseDate);
+                switch (recurringType) {
+                    case 'weekly':
+                        nextDate.setDate(baseDate.getDate() + (i * 7));
+                        break;
+                    case 'biweekly':
+                        nextDate.setDate(baseDate.getDate() + (i * 14));
+                        break;
+                    case 'monthly':
+                        nextDate.setMonth(baseDate.getMonth() + i);
+                        break;
+                }
+                dates.push(nextDate);
+            }
+
+            // Display recurring dates
+            const datesContainer = document.createElement('div');
+            datesContainer.className = 'recurring-dates';
+            datesContainer.innerHTML = `
+                <h4>Recurring Appointments:</h4>
+                ${dates.map(date => `
+                    <div class="recurring-date">
+                        <span>${date.toLocaleDateString()}</span>
+                        <span>${date.toLocaleTimeString([], { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        })}</span>
+                    </div>
+                `).join('')}
+            `;
+
+            // Replace or add dates container
+            const existingDates = recurringOptions.querySelector('.recurring-dates');
+            if (existingDates) {
+                existingDates.remove();
+            }
+            recurringOptions.appendChild(datesContainer);
+        }
+
+        // Event Listeners
+        datetimeInput.addEventListener('change', (e) => {
+            generateTimeSlots(new Date(e.target.value));
+        });
+
+        recurringSelect.addEventListener('change', updateRecurringDates);
+        recurringCount.addEventListener('change', updateRecurringDates);
+
+        // Staff Management
+        const staffMembers = [
+            {
+                id: 1,
+                name: "Dr. Sarah Johnson",
+                title: "Senior Specialist",
+                specialty: "expert",
+                image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                rating: 4.8,
+                ratingCount: 127,
+                status: "available",
+                languages: ["English", "Spanish"],
+                experience: "15+ years",
+                schedule: {
+                    monday: "9:00 AM - 5:00 PM",
+                    tuesday: "9:00 AM - 5:00 PM",
+                    wednesday: "9:00 AM - 1:00 PM",
+                    thursday: "9:00 AM - 5:00 PM",
+                    friday: "9:00 AM - 5:00 PM"
+                },
+                bio: "Dr. Johnson has over 15 years of experience specializing in advanced treatments.",
+                certifications: ["Board Certified", "Advanced Specialist"],
+                education: "Harvard Medical School",
+                specializations: ["Pediatrics", "Family Medicine"]
+            },
+            {
+                id: 2,
+                name: "Dr. Michael Chen",
+                title: "General Practitioner",
+                specialty: "general",
+                image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                rating: 4.6,
+                ratingCount: 89,
+                status: "busy",
+                schedule: {
+                    monday: "10:00 AM - 6:00 PM",
+                    tuesday: "10:00 AM - 6:00 PM",
+                    thursday: "10:00 AM - 6:00 PM",
+                    friday: "10:00 AM - 4:00 PM"
+                },
+                bio: "Dr. Chen specializes in general practice with a focus on preventive care.",
+                languages: ["English", "Mandarin"],
+                certifications: ["General Practice", "Preventive Care"]
+            },
+            {
+                id: 3,
+                name: "Dr. Fatima Al-Sayed",
+                title: "Family Medicine Specialist",
+                specialty: "specialist",
+                image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                rating: 4.9,
+                ratingCount: 156,
+                status: "available",
+                languages: ["Arabic", "English", "French"],
+                experience: "12+ years",
+                schedule: {
+                    sunday: "10:00 AM - 6:00 PM",
+                    monday: "10:00 AM - 6:00 PM",
+                    tuesday: "1:00 PM - 8:00 PM",
+                    thursday: "10:00 AM - 6:00 PM",
+                    saturday: "9:00 AM - 3:00 PM"
+                },
+                bio: "Dr. Al-Sayed is a highly experienced family medicine specialist with expertise in women's health and pediatric care. She completed her medical training at the American University of Beirut and has practiced in multiple international hospitals.",
+                certifications: [
+                    "American Board of Family Medicine",
+                    "Women's Health Specialist",
+                    "Pediatric Care Certification"
+                ],
+                education: "American University of Beirut",
+                specializations: [
+                    "Family Medicine",
+                    "Women's Health",
+                    "Pediatric Care",
+                    "Preventive Medicine"
+                ]
+            }
+        ];
+
+        const staffGrid = document.getElementById('staffGrid');
+        const staffSpecialty = document.getElementById('staffSpecialty');
+        const staffAvailability = document.getElementById('staffAvailability');
+        const staffLanguage = document.getElementById('staffLanguage');
+
+        function displayStaff(filteredStaff = staffMembers) {
+            staffGrid.innerHTML = '';
+            
+            filteredStaff.forEach(staff => {
+                const card = document.createElement('div');
+                card.className = 'staff-card';
+                
+                const workingDays = Object.keys(staff.schedule).length;
+                const schedulePreview = Array(7).fill(false)
+                    .map((_, i) => Object.keys(staff.schedule)
+                        .includes(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][i]));
+                
+                card.innerHTML = `
+                    <div class="staff-image-container">
+                        <img src="${staff.image}" alt="${staff.name}" class="staff-image">
+                        <span class="staff-status ${staff.status}">${staff.status}</span>
+                    </div>
+                    <div class="staff-info">
+                        <div class="staff-header-info">
+                            <div class="staff-name-title">
+                                <h3 class="staff-name">${staff.name}</h3>
+                                <p class="staff-title">${staff.title}</p>
+                            </div>
+                            <div class="staff-rating">
+                                <span class="rating-stars">${'★'.repeat(Math.floor(staff.rating))}${staff.rating % 1 ? '½' : ''}</span>
+                                <span>(${staff.ratingCount})</span>
+                            </div>
+                        </div>
+                        <div class="staff-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-user-md"></i>
+                                ${staff.specialty}
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                ${staff.experience}
+                            </span>
+                            <span class="meta-item">
+                                <i class="fas fa-language"></i>
+                                ${staff.languages.join(', ')}
+                            </span>
+                        </div>
+                        <div class="staff-schedule">
+                            <div class="schedule-preview">
+                                ${schedulePreview.map(day => `
+                                    <span class="schedule-dot ${day ? 'active' : ''}"></span>
+                                `).join('')}
+                            </div>
+                            <small>Available ${workingDays} days a week</small>
+                        </div>
+                        <div class="staff-actions">
+                            <button class="btn-book-staff" onclick="bookStaff(${staff.id})">
+                                <i class="fas fa-calendar-plus"></i>
+                                Book Appointment
+                            </button>
+                            <button class="btn-view-profile" onclick="viewStaffProfile(${staff.id})">
+                                <i class="fas fa-user"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                staffGrid.appendChild(card);
+            });
+        }
+
+        function filterStaff() {
+            const specialty = staffSpecialty.value;
+            const availability = staffAvailability.value;
+            const language = staffLanguage.value;
+            
+            let filtered = staffMembers;
+            
+            if (specialty) {
+                filtered = filtered.filter(staff => staff.specialty === specialty);
+            }
+            
+            if (language) {
+                filtered = filtered.filter(staff => staff.languages.includes(language));
+            }
+            
+            if (availability) {
+                const today = new Date();
+                filtered = filtered.filter(staff => {
+                    switch(availability) {
+                        case 'today':
+                            const dayName = today.toLocaleDateString('en-US', { weekday: 'lowercase' });
+                            return staff.schedule[dayName];
+                        case 'morning':
+                            return Object.values(staff.schedule).some(time => 
+                                time.includes('AM'));
+                        case 'afternoon':
+                            return Object.values(staff.schedule).some(time => 
+                                time.includes('PM'));
+                        default:
+                            return true;
+                    }
+                });
+            }
+            
+            displayStaff(filtered);
+        }
+
+        function bookStaff(staffId) {
+            const staff = staffMembers.find(s => s.id === staffId);
+            if (staff) {
+                // Add staff ID to the booking form
+                const staffInput = document.createElement('input');
+                staffInput.type = 'hidden';
+                staffInput.name = 'staffId';
+                staffInput.value = staffId;
+                appointmentForm.appendChild(staffInput);
+                
+                // Scroll to booking form
+                document.querySelector('.booking-form').scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+                
+                showNotification(`Booking with ${staff.name}`, 'success');
+            }
+        }
+
+        function viewStaffProfile(staffId) {
+            const staff = staffMembers.find(s => s.id === staffId);
+            if (staff) {
+                const modal = document.createElement('div');
+                modal.className = 'staff-modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <span class="modal-close" onclick="closeStaffProfile()">&times;</span>
+                        <img src="${staff.image}" alt="${staff.name}" class="staff-image">
+                        <h2>${staff.name}</h2>
+                        <p>${staff.bio}</p>
+                        <h3>Languages</h3>
+                        <p>${staff.languages.join(', ')}</p>
+                        <h3>Certifications</h3>
+                        <p>${staff.certifications.join(', ')}</p>
+                        <h3>Schedule</h3>
+                        ${Object.entries(staff.schedule).map(([day, time]) => `
+                            <div class="schedule-day">
+                                <span>${day.charAt(0).toUpperCase() + day.slice(1)}</span>
+                                <span>${time}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                setTimeout(() => modal.classList.add('active'), 10);
+            }
+        }
+
+        function closeStaffProfile() {
+            const modal = document.querySelector('.staff-modal');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+
+        // Event listeners
+        staffSpecialty.addEventListener('change', filterStaff);
+        staffAvailability.addEventListener('change', filterStaff);
+        staffLanguage.addEventListener('change', filterStaff);
+
+        // View Toggle
+        const viewButtons = document.querySelectorAll('.view-btn');
+        viewButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                viewButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const view = btn.dataset.view;
+                staffGrid.className = `staff-grid ${view}-view`;
+            });
+        });
+
+        // Initialize
+        displayStaff();
+
+        // Reviews System
+        let reviews = [
+            {
+                id: 1,
+                doctorId: 1,
+                rating: 5,
+                reviewerName: "John Smith",
+                reviewerAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36",
+                content: "Dr. Johnson was excellent! Very professional and thorough in her examination.",
+                date: "2024-02-15",
+                verified: true
+            },
+            {
+                id: 2,
+                doctorId: 3,
+                rating: 5,
+                reviewerName: "Sarah Ahmed",
+                reviewerAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
+                content: "Dr. Al-Sayed was very understanding and patient. She explained everything clearly in both Arabic and English.",
+                date: "2024-02-14",
+                verified: true
+            }
+            // Add more reviews as needed
+        ];
+
+        function displayReviews(filteredReviews = reviews) {
+            const reviewsList = document.getElementById('reviewsList');
+            reviewsList.innerHTML = '';
+
+            filteredReviews.forEach(review => {
+                const doctor = staffMembers.find(s => s.id === review.doctorId);
+                const card = document.createElement('div');
+                card.className = 'review-card';
+                card.innerHTML = `
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <img src="${review.reviewerAvatar}" alt="${review.reviewerName}" class="reviewer-avatar">
+                            <div>
+                                <h4>${review.reviewerName}</h4>
+                                <div class="review-rating">${'★'.repeat(review.rating)}</div>
+                            </div>
+                        </div>
+                        ${review.verified ? '<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified Visit</span>' : ''}
+                    </div>
+                    <p class="review-content">${review.content}</p>
+                    <div class="review-meta">
+                        <span>Doctor: ${doctor.name}</span>
+                        <span>${new Date(review.date).toLocaleDateString()}</span>
+                    </div>
+                `;
+                reviewsList.appendChild(card);
+            });
+        }
+
+        function showReviewForm() {
+            const modal = document.createElement('div');
+            modal.className = 'review-modal';
+            modal.innerHTML = `
+                <div class="review-form">
+                    <h3>Write a Review</h3>
+                    <select id="reviewDoctorSelect" class="filter-select" required>
+                        <option value="">Select Doctor</option>
+                        ${staffMembers.map(staff => `
+                            <option value="${staff.id}">${staff.name}</option>
+                        `).join('')}
+                    </select>
+                    <div class="star-rating" id="starRating">
+                        <span data-rating="1">★</span>
+                        <span data-rating="2">★</span>
+                        <span data-rating="3">★</span>
+                        <span data-rating="4">★</span>
+                        <span data-rating="5">★</span>
+                    </div>
+                    <textarea placeholder="Share your experience..." rows="4" class="form-control"></textarea>
+                    <div class="form-actions">
+                        <button class="btn-secondary" onclick="closeReviewForm()">Cancel</button>
+                        <button class="btn-primary" onclick="submitReview()">Submit Review</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('active'), 10);
+
+            // Star rating functionality
+            const stars = modal.querySelectorAll('.star-rating span');
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = star.dataset.rating;
+                    stars.forEach(s => {
+                        s.style.color = s.dataset.rating <= rating ? '#f59e0b' : '#ddd';
+                    });
+                });
+            });
+        }
+
+        function closeReviewForm() {
+            const modal = document.querySelector('.review-modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+
+        // Update the submitReview function
+        function submitReview() {
+            const modal = document.querySelector('.review-modal');
+            const doctorId = parseInt(modal.querySelector('#reviewDoctorSelect').value);
+            const rating = modal.querySelectorAll('.star-rating span[style*="rgb(245, 158, 11)"]').length;
+            const content = modal.querySelector('textarea').value.trim();
+
+            if (!doctorId || !rating || !content) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+
+            // Create new review object
+            const newReview = {
+                id: reviews.length + 1,
+                doctorId: doctorId,
+                rating: rating,
+                reviewerName: "Anonymous User", // You can add user name input if needed
+                reviewerAvatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80",
+                content: content,
+                date: new Date().toISOString().split('T')[0],
+                verified: true
+            };
+
+            // Add to reviews array
+            reviews.unshift(newReview); // Add to beginning of array
+
+            // Update local storage
+            localStorage.setItem('doctorReviews', JSON.stringify(reviews));
+
+            // Update display
+            displayReviews();
+
+            // Update rating summary
+            updateRatingSummary();
+
+            // Close modal and show notification
+            closeReviewForm();
+            showNotification('Review submitted successfully!', 'success');
+        }
+
+        // Add function to update rating summary
+        function updateRatingSummary() {
+            const totalReviews = reviews.length;
+            const ratingSum = reviews.reduce((sum, review) => sum + review.rating, 0);
+            const averageRating = (ratingSum / totalReviews).toFixed(1);
+
+            // Count reviews for each rating
+            const ratingCounts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            reviews.forEach(review => {
+                ratingCounts[review.rating]++;
+            });
+
+            // Update summary display
+            document.querySelector('.average-rating h3').textContent = averageRating;
+            document.querySelector('.average-rating p').textContent = `Based on ${totalReviews} reviews`;
+
+            // Update rating bars
+            Object.entries(ratingCounts).forEach(([rating, count]) => {
+                const percentage = (count / totalReviews * 100).toFixed(0);
+                const barElement = document.querySelector(`.rating-bar:nth-child(${6 - rating}) .bar`);
+                const countElement = document.querySelector(`.rating-bar:nth-child(${6 - rating}) span:last-child`);
+                
+                barElement.style.width = `${percentage}%`;
+                countElement.textContent = count;
+            });
+        }
+
+        // Load reviews from local storage on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedReviews = localStorage.getItem('doctorReviews');
+            if (savedReviews) {
+                reviews = JSON.parse(savedReviews);
+            }
+            displayReviews();
+            updateRatingSummary();
+        });
+
+        // Populate doctor filter
+        const reviewDoctor = document.getElementById('reviewDoctor');
+        staffMembers.forEach(staff => {
+            const option = document.createElement('option');
+            option.value = staff.id;
+            option.textContent = staff.name;
+            reviewDoctor.appendChild(option);
+        });
+
+        // Event listeners
+        document.getElementById('reviewSort').addEventListener('change', (e) => {
+            let sorted = [...reviews];
+            switch(e.target.value) {
+                case 'recent':
+                    sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    break;
+                case 'highest':
+                    sorted.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'lowest':
+                    sorted.sort((a, b) => a.rating - b.rating);
+                    break;
+            }
+            displayReviews(sorted);
+        });
+
+        document.getElementById('reviewDoctor').addEventListener('change', (e) => {
+            const filtered = e.target.value ? 
+                reviews.filter(review => review.doctorId === parseInt(e.target.value)) :
+                reviews;
+            displayReviews(filtered);
+        });
+
+        // Initialize reviews display
+        displayReviews();
+
+        // Notification System
+        let notifications = [];
+
+        function addNotification(title, message, type = 'info') {
+            const notification = {
+                id: Date.now(),
+                title,
+                message,
+                type,
+                time: new Date(),
+                read: false
+            };
+            
+            notifications.unshift(notification);
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            updateNotificationBadge();
+            displayNotifications();
+        }
+
+        function displayNotifications() {
+            const notificationList = document.getElementById('notificationList');
+            notificationList.innerHTML = '';
+
+            if (notifications.length === 0) {
+                notificationList.innerHTML = '<div class="notification-item"><p>No notifications</p></div>';
+                return;
+            }
+
+            notifications.forEach(notification => {
+                const timeAgo = getTimeAgo(notification.time);
+                const item = document.createElement('div');
+                item.className = `notification-item ${!notification.read ? 'unread' : ''}`;
+                item.innerHTML = `
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-message">${notification.message}</div>
+                    <div class="notification-time">${timeAgo}</div>
+                `;
+                item.onclick = () => markAsRead(notification.id);
+                notificationList.appendChild(item);
+            });
+        }
+
+        function markAsRead(id) {
+            notifications = notifications.map(notification => 
+                notification.id === id ? {...notification, read: true} : notification
+            );
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            updateNotificationBadge();
+            displayNotifications();
+        }
+
+        function clearAllNotifications() {
+            notifications = [];
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            updateNotificationBadge();
+            displayNotifications();
+            toggleNotificationCenter();
+        }
+
+        function updateNotificationBadge() {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            let badge = document.querySelector('.notification-badge');
+            
+            if (unreadCount > 0) {
+                if (!badge) {
+                    badge = document.createElement('div');
+                    badge.className = 'notification-badge';
+                    badge.onclick = toggleNotificationCenter;
+                    document.body.appendChild(badge);
+                }
+                badge.textContent = `${unreadCount} New`;
+            } else if (badge) {
+                badge.remove();
+            }
+        }
+
+        function toggleNotificationCenter() {
+            const center = document.getElementById('notificationCenter');
+            center.classList.toggle('active');
+        }
+
+        function getTimeAgo(time) {
+            const diff = new Date() - new Date(time);
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+            if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            return 'Just now';
+        }
+
+        // Add appointment reminder functionality
+        function checkUpcomingAppointments() {
+            const now = new Date();
+            appointments.forEach(appointment => {
+                const appointmentTime = new Date(appointment.datetime);
+                const timeDiff = appointmentTime - now;
+                
+                // 24 hours reminder
+                if (timeDiff > 0 && timeDiff <= 24 * 60 * 60 * 1000) {
+                    addNotification(
+                        'Upcoming Appointment',
+                        `You have an appointment with ${appointment.name} tomorrow at ${appointmentTime.toLocaleTimeString()}`,
+                        'reminder'
+                    );
+                }
+                
+                // 1 hour reminder
+                if (timeDiff > 0 && timeDiff <= 60 * 60 * 1000) {
+                    addNotification(
+                        'Appointment Soon',
+                        `Your appointment with ${appointment.name} is in 1 hour`,
+                        'urgent'
+                    );
+                }
+            });
+        }
+
+        // Load notifications from localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedNotifications = localStorage.getItem('notifications');
+            if (savedNotifications) {
+                notifications = JSON.parse(savedNotifications);
+                displayNotifications();
+                updateNotificationBadge();
+            }
+
+            // Check for upcoming appointments every minute
+            setInterval(checkUpcomingAppointments, 60000);
+        });
+
+        // Add notification when booking appointment
+        const originalSubmitAppointment = appointmentForm.onsubmit;
+        appointmentForm.onsubmit = (e) => {
+            originalSubmitAppointment(e);
+            addNotification(
+                'Appointment Booked',
+                'Your appointment has been successfully scheduled',
+                'success'
+            );
+        };
+
+        // Medical Reports System
+        let medicalReports = [];
+
+        function generateReport(data) {
+            const report = {
+                id: Date.now(),
+                type: data.type,
+                patientName: data.patientName,
+                doctorId: data.doctorId,
+                date: new Date().toISOString(),
+                content: data.content,
+                diagnosis: data.diagnosis || '',
+                prescription: data.prescription || '',
+                testResults: data.testResults || '',
+                status: 'active'
+            };
+
+            medicalReports.unshift(report);
+            localStorage.setItem('medicalReports', JSON.stringify(medicalReports));
+            displayReports();
+            addNotification('New Report', `A new ${data.type} has been generated`, 'info');
+        }
+
+        function displayReports(filteredReports = medicalReports) {
+            const reportsList = document.getElementById('reportsList');
+            reportsList.innerHTML = '';
+
+            filteredReports.forEach(report => {
+                const doctor = staffMembers.find(s => s.id === report.doctorId);
+                const card = document.createElement('div');
+                card.className = 'report-card';
+                card.innerHTML = `
+                    <div class="report-header">
+                        <span class="report-type ${report.type}">${report.type.charAt(0).toUpperCase() + report.type.slice(1)}</span>
+                        <span class="report-date">${new Date(report.date).toLocaleDateString()}</span>
+                    </div>
+                    <div class="report-content">
+                        <h4>${report.patientName}</h4>
+                        <p>Doctor: ${doctor ? doctor.name : 'Unknown'}</p>
+                        <p>${report.content.substring(0, 100)}...</p>
+                    </div>
+                    <div class="report-actions">
+                        <button class="report-btn btn-view" onclick="viewReport(${report.id})">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="report-btn btn-download" onclick="downloadReport(${report.id})">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                `;
+                reportsList.appendChild(card);
+            });
+        }
+
+        function showReportForm() {
+            const modal = document.createElement('div');
+            modal.className = 'report-form-modal';
+            modal.innerHTML = `
+                <div class="report-form">
+                    <h3>Generate New Report</h3>
+                    <select id="reportTypeInput" class="filter-select" required>
+                        <option value="report">Medical Report</option>
+                        <option value="prescription">Prescription</option>
+                        <option value="test">Test Results</option>
+                    </select>
+                    <input type="text" id="patientNameInput" placeholder="Patient Name" class="form-control" required>
+                    <select id="doctorInput" class="filter-select" required>
+                        ${staffMembers.map(staff => `
+                            <option value="${staff.id}">${staff.name}</option>
+                        `).join('')}
+                    </select>
+                    <textarea id="reportContent" rows="6" placeholder="Report Content" class="form-control" required></textarea>
+                    <div class="form-actions">
+                        <button class="btn-secondary" onclick="closeReportForm()">Cancel</button>
+                        <button class="btn-primary" onclick="submitReport()">Generate Report</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closeReportForm() {
+            const modal = document.querySelector('.report-form-modal');
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
+        }
+
+        function submitReport() {
+            const type = document.getElementById('reportTypeInput').value;
+            const patientName = document.getElementById('patientNameInput').value;
+            const doctorId = parseInt(document.getElementById('doctorInput').value);
+            const content = document.getElementById('reportContent').value;
+
+            if (!type || !patientName || !doctorId || !content) {
+                showNotification('Please fill in all fields', 'error');
+                return;
+            }
+
+            generateReport({
+                type,
+                patientName,
+                doctorId,
+                content
+            });
+
+            closeReportForm();
+            showNotification('Report generated successfully', 'success');
+        }
+
+        function viewReport(reportId) {
+            const report = medicalReports.find(r => r.id === reportId);
+            if (!report) return;
+
+            const modal = document.createElement('div');
+            modal.className = 'report-form-modal';
+            modal.innerHTML = `
+                <div class="report-form">
+                    <h3>${report.type.charAt(0).toUpperCase() + report.type.slice(1)}</h3>
+                    <p><strong>Patient:</strong> ${report.patientName}</p>
+                    <p><strong>Date:</strong> ${new Date(report.date).toLocaleDateString()}</p>
+                    <p><strong>Doctor:</strong> ${staffMembers.find(s => s.id === report.doctorId)?.name}</p>
+                    <div class="report-content">
+                        ${report.content}
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="closeReportForm()">Close</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function downloadReport(reportId) {
+            const report = medicalReports.find(r => r.id === reportId);
+            if (!report) return;
+
+            // Create new jsPDF instance
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Set up document properties
+            doc.setFont("helvetica");
+            doc.setFontSize(20);
+            doc.setTextColor(41, 128, 185); // Primary color for header
+
+            // Add header
+            doc.text(report.type.toUpperCase(), 20, 20);
+
+            // Add logo or hospital name
+            doc.setFontSize(12);
+            doc.setTextColor(100);
+            doc.text("Professional Appointment Booking", 20, 30);
+
+            // Add horizontal line
+            doc.setDrawColor(220);
+            doc.line(20, 35, 190, 35);
+
+            // Reset text color for content
+            doc.setTextColor(60);
+            doc.setFontSize(12);
+
+            // Add report details
+            const doctor = staffMembers.find(s => s.id === report.doctorId);
+            let yPos = 50;
+
+            // Add metadata with proper spacing
+            doc.setFont("helvetica", "bold");
+            doc.text("Patient Name:", 20, yPos);
+            doc.setFont("helvetica", "normal");
+            doc.text(report.patientName, 70, yPos);
+            yPos += 10;
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Date:", 20, yPos);
+            doc.setFont("helvetica", "normal");
+            doc.text(new Date(report.date).toLocaleDateString(), 70, yPos);
+            yPos += 10;
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Doctor:", 20, yPos);
+            doc.setFont("helvetica", "normal");
+            doc.text(doctor ? doctor.name : 'Unknown', 70, yPos);
+            yPos += 20;
+
+            // Add report content
+            doc.setFont("helvetica", "bold");
+            doc.text("Report Content:", 20, yPos);
+            yPos += 10;
+            doc.setFont("helvetica", "normal");
+
+            // Handle long content with word wrap
+            const splitContent = doc.splitTextToSize(report.content, 170);
+            splitContent.forEach(line => {
+                if (yPos > 250) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                doc.text(line, 20, yPos);
+                yPos += 7;
+            });
+
+            // Add footer
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.text(
+                    `Page ${i} of ${pageCount}`,
+                    doc.internal.pageSize.width / 2,
+                    doc.internal.pageSize.height - 10,
+                    { align: "center" }
+                );
+                doc.text(
+                    `Generated on ${new Date().toLocaleDateString()}`,
+                    20,
+                    doc.internal.pageSize.height - 10
+                );
+            }
+
+            // Add watermark or certification
+            if (report.type === 'prescription') {
+                doc.setTextColor(200);
+                doc.setFontSize(60);
+                doc.text(
+                    'PRESCRIPTION',
+                    doc.internal.pageSize.width / 2,
+                    doc.internal.pageSize.height / 2,
+                    {
+                        align: 'center',
+                        angle: 45,
+                        opacity: 0.2
+                    }
+                );
+            }
+
+            // Save the PDF
+            const fileName = `${report.type}_${report.patientName}_${new Date(report.date).toLocaleDateString().replace(/\//g, '-')}.pdf`;
+            try {
+                doc.save(fileName);
+                showNotification('Report downloaded successfully', 'success');
+            } catch (error) {
+                showNotification('Error downloading report', 'error');
+                console.error('PDF generation error:', error);
+            }
+        }
+
+        // Filter reports
+        document.getElementById('reportType').addEventListener('change', filterReports);
+        document.getElementById('reportDate').addEventListener('change', filterReports);
+
+        function filterReports() {
+            const type = document.getElementById('reportType').value;
+            const date = document.getElementById('reportDate').value;
+
+            let filtered = medicalReports;
+
+            if (type !== 'all') {
+                filtered = filtered.filter(report => report.type === type);
+            }
+
+            if (date) {
+                filtered = filtered.filter(report => 
+                    report.date.startsWith(date)
+                );
+            }
+
+            displayReports(filtered);
+        }
+
+        // Load reports from localStorage
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedReports = localStorage.getItem('medicalReports');
+            if (savedReports) {
+                medicalReports = JSON.parse(savedReports);
+                displayReports();
+            }
+        });
+    </script>
+</body>
+</html>
